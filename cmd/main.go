@@ -46,6 +46,11 @@ func main() {
 			user.PUT("/:id", controllers.EditUserById)
 		}
 
+		post := v1.Group("/post")
+		{
+			post.POST("/", middleware.RequireAuth, controllers.CreatePost)
+		}
+
 	}
 
 	router.Use(middleware.CorsMiddleware())
