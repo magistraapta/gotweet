@@ -8,15 +8,22 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func ConnectToDatabase() {
+func ConnectToDatabase() (*gorm.DB, error) {
 	var err error
 
 	databaseConfig := os.Getenv("DATABASE_CONFIG")
 
-	DB, err = gorm.Open(postgres.Open(databaseConfig), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed Connect to Database ", err)
+	if databaseConfig == "" {
+		log.Fatal("Database config is not set")
 	}
+
+	db, err := gorm.Open(postgres.Open(databaseConfig), &gorm.Config{})
+	if err != nil {
+		log.Println("Failed Connect to Database ", err)
+		return nil, err
+	}
+
+	log.Println("Connected to database")
+
+	return db, nil
 }

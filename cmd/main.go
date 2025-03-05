@@ -1,8 +1,10 @@
 package main
 
 import (
-	"docker-test/controllers"
 	"docker-test/initializers"
+	"docker-test/internal/handler"
+	"docker-test/internal/services"
+	"docker-test/internal/store"
 	"docker-test/middleware"
 	"log"
 	"os"
@@ -29,31 +31,45 @@ func main() {
 		panic(err)
 	}
 
-	router.Static("/static", "./static")
+	//connect to db
+	db, err := initializers.ConnectToDatabase()
+
+	if err != nil {
+		log.Fatal("Failed to connect database")
+	}
+
+	userStore := store.NewUserStore(db)
+	userService := services.NewUserService(userStore)
+	userHandler := handler.NewUserHandler(userService)
+
+	postStore := store.NewPostStore(db)
+	postService := services.NewPostService(postStore)
+	postHandler := handler.NewPostHandler(postService)
+
+	router.Use(middleware.CORSMiddleware())
 
 	v1 := router.Group("/v1")
 	{
-		v1.POST("/signup", controllers.Signup)
-		v1.POST("/upload", controllers.HandleImageUpload)
-		v1.POST("/login", controllers.Login)
-		v1.GET("/validate", middleware.RequireAuth, controllers.Validate)
+		v1.POST("/signup", userHandler.Signup)
+		v1.POST("/login", userHandler.Login)
+		v1.GET("/validate", middleware.RequireAuth, middleware.ValidateUser)
 		user := v1.Group("/user")
 		{
-			user.PUT("/", middleware.RequireAuth, controllers.UpdateUser)
-			user.GET("/", controllers.GetAllUsers)
-			user.GET("/:id", controllers.GetUserById)
-			user.DELETE("/:id", controllers.DeleteUserById)
-			user.PUT("/:id", controllers.EditUserById)
+			user.PUT("/", middleware.RequireAuth, userHandler.UpdateUser)
+			user.GET("/", userHandler.GetAllUsers)
+			user.GET("/:id", userHandler.GetUserById)
+			user.DELETE("/:id", userHandler.DeleteUserById)
+			user.PUT("/:id", userHandler.UpdateUserById)
 		}
 
 		post := v1.Group("/post")
 		{
-			post.POST("/", middleware.RequireAuth, controllers.CreatePost)
+			post.POST("/", middleware.RequireAuth, postHandler.CreatePost)
+			post.GET("/", postHandler.GetAllPost)
 		}
 
 	}
 
-	router.Use(middleware.CorsMiddleware())
 	if err := router.Run(":8080"); err != nil {
 		log.Fatalf("Failed to connect to server: %v", err)
 	}

@@ -4,6 +4,7 @@ import (
 	"docker-test/initializers"
 	"docker-test/model"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -46,7 +47,14 @@ func RequireAuth(c *gin.Context) {
 
 		// Find the user
 		var user model.User
-		initializers.DB.First(&user, claims["sub"])
+		db, err := initializers.ConnectToDatabase()
+
+		db.First(&user, claims["sub"])
+
+		if err != nil {
+			log.Fatal("failed to create user")
+		}
+		
 		if user.ID == 0 {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
