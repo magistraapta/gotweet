@@ -7,15 +7,8 @@ import (
 	"docker-test/internal/store"
 	"docker-test/middleware"
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
-)
-
-const (
-	MaxUploadSize   = 8 << 20
-	FileDirectory   = "static/upload"
-	filePermissions = 0o755
 )
 
 func init() {
@@ -26,10 +19,6 @@ func init() {
 
 func main() {
 	router := gin.Default()
-
-	if err := os.MkdirAll(FileDirectory, filePermissions); err != nil {
-		panic(err)
-	}
 
 	//connect to db
 	db, err := initializers.ConnectToDatabase()
