@@ -1,6 +1,7 @@
 package store
 
 import (
+	"docker-test/dto"
 	"docker-test/model"
 	"log"
 
@@ -15,7 +16,7 @@ func NewUserStore(db *gorm.DB) *UserStore {
 	return &UserStore{DB: db}
 }
 
-func (s *UserStore) GetUserById(id int) (*model.User, error) {
+func (s *UserStore) GetUserById(id int) (*dto.UserResponse, error) {
 	var user model.User
 
 	result := s.DB.Find(&user, id)
@@ -24,7 +25,12 @@ func (s *UserStore) GetUserById(id int) (*model.User, error) {
 		return nil, result.Error
 	}
 
-	return &user, nil
+	userResponse := dto.UserResponse{
+		Username:  user.Username,
+		CreatedAt: user.CreatedAt,
+	}
+
+	return &userResponse, nil
 }
 
 func (s *UserStore) GetAllUsers() (*[]model.User, error) {

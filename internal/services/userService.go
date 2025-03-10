@@ -1,6 +1,7 @@
 package services
 
 import (
+	"docker-test/dto"
 	"docker-test/internal/store"
 	"docker-test/model"
 	"errors"
@@ -19,7 +20,7 @@ func NewUserService(store *store.UserStore) *UserService {
 	return &UserService{store: store}
 }
 
-func (s *UserService) GetUserById(id int) (*model.User, error) {
+func (s *UserService) GetUserById(id int) (*dto.UserResponse, error) {
 	return s.store.GetUserById(id)
 }
 
