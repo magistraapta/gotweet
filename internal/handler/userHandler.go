@@ -3,6 +3,7 @@ package handler
 import (
 	"docker-test/internal/services"
 	"docker-test/model"
+	"docker-test/types"
 	"net/http"
 	"strconv"
 
@@ -149,12 +150,9 @@ func (h *UserHandler) Signup(c *gin.Context) {
 
 func (h *UserHandler) Login(c *gin.Context) {
 	// get req body
-	var body struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var userLogin types.CreateUserRequest
 
-	if err := c.ShouldBindJSON(&body); err != nil {
+	if err := c.ShouldBindJSON(&userLogin); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"err": "Invalid request body",
 		})
@@ -162,7 +160,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.services.Login(body.Email, body.Password)
+	token, err := h.services.Login(userLogin.Email, userLogin.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

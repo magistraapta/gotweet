@@ -35,6 +35,10 @@ func main() {
 	postService := services.NewPostService(postStore)
 	postHandler := handler.NewPostHandler(postService)
 
+	commentStore := store.NewCommentStore(db)
+	commentService := services.NewCommentService(commentStore)
+	commentHandler := handler.NewCommentHandler(commentService)
+
 	router.Use(middleware.CORSMiddleware())
 
 	v1 := router.Group("/v1")
@@ -55,6 +59,13 @@ func main() {
 		{
 			post.POST("/", middleware.RequireAuth, postHandler.CreatePost)
 			post.GET("/", postHandler.GetAllPost)
+			post.GET("/:id", postHandler.GetPostById)
+		}
+
+		comment := v1.Group("/comment")
+		{
+			comment.POST("/:id", middleware.RequireAuth, commentHandler.CreateComment)
+			// comment.GET("/", middleware.RequireAuth, commentHandler.GetUserID)
 		}
 
 	}

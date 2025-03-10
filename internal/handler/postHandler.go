@@ -4,6 +4,7 @@ import (
 	"docker-test/internal/services"
 	"docker-test/model"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -52,14 +53,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": "Failed to create post"})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"msg": "Post created successfully", "post": gin.H{
-		"id":        post.ID,
-		"userId":    post.UserID,
-		"content":   post.Content,
-		"createdAt": post.CreatedAt,
-		"updatedAt": post.UpdatedAt,
-	},
-	})
+	c.JSON(http.StatusOK, gin.H{"msg": "Post created successfully", "post": post})
 }
 
 func (h *PostHandler) GetAllPost(c *gin.Context) {
@@ -74,4 +68,24 @@ func (h *PostHandler) GetAllPost(c *gin.Context) {
 		"msg":   "success",
 		"posts": posts,
 	})
+}
+
+func (h *PostHandler) GetPostById(c *gin.Context) {
+	postID, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"msg": "Invalid post ID",
+		})
+		return
+	}
+
+	post, err := h.services.GetPostById(postID)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post)
 }
