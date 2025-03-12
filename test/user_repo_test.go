@@ -21,17 +21,21 @@ func TestCreateUser(t *testing.T) {
 
 	mockUser := model.User{Username: "John Pork"}
 
-	// Call Signup function
-	err := services.Signup(&mockUser)
-	assert.Nil(t, err, "Signup should not return an error")
+	t.Run("Signup should not return an error", func(t *testing.T) {
+		err := services.Signup(&mockUser)
+		assert.Nil(t, err, "Signup should not return an error")
+	})
 
+	t.Run("User should be exist in database", func(t *testing.T) {
+		var createdUser model.User
+		result := db.First(&createdUser, "username = ?", mockUser.Username)
+		assert.Nil(t, result.Error, "User should exist in the database")
+
+		// Ensure stored user has expected values
+		assert.Equal(t, mockUser.Username, createdUser.Username)
+	})
 	// Verify user exists in DB
-	var createdUser model.User
-	result := db.First(&createdUser, "username = ?", mockUser.Username)
-	assert.Nil(t, result.Error, "User should exist in the database")
 
-	// Ensure stored user has expected values
-	assert.Equal(t, mockUser.Username, createdUser.Username)
 }
 
 func TestGetUserByID(t *testing.T) {
