@@ -24,3 +24,23 @@ Run the backend
 ```bash
   go run cmd/main.go
 ```
+
+## API Endpoint Request Example
+
+### **Signup User**
+
+Request Body
+```json
+{
+  "username": "Mike",
+  "email": "mike@email.com",
+  "password": "mike123"
+}
+```
+
+Response Body
+```json
+{
+  "message": "user successfully created"
+}
+```
